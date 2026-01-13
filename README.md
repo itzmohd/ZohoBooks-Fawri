@@ -7,7 +7,7 @@ This plugin integrates Zoho Books with the FAWRI API, automatically triggering t
 - **Trigger**: Payment Creation in Zoho Books
 - **Action**: POST request to FAWRI API endpoint
 - **Authentication**: OAuth 2.0
-- **API Endpoint**: `https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute`
+- **API Endpoint**: `https://{{Env_URL}}/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute`
 
 ## Quick Start Checklist
 
@@ -68,9 +68,9 @@ Before creating a connection, register your OAuth client:
    - **Authentication Type**: OAuth 2.0
    - **Client ID**: (from Step 1)
    - **Client Secret**: (from Step 1)
-   - **Authorize URL**: `https://oic.asbblabs.com/oauth2/authorize` (update with actual URL)
-   - **Access Token URL**: `https://oic.asbblabs.com/oauth2/token` (update with actual URL)
-   - **Refresh Token URL**: `https://oic.asbblabs.com/oauth2/token` (update with actual URL)
+   - **Authorize URL**: `https://{{Env_URL}}/oauth2/authorize` (update with actual URL)
+   - **Access Token URL**: `https://{{Env_URL}}/oauth2/token` (update with actual URL)
+   - **Refresh Token URL**: `https://{{Env_URL}}/oauth2/token` (update with actual URL)
 9. Click **Create**
 10. Now create the connection:
     - **Connection Name**: `fawri_oauth_connection`
