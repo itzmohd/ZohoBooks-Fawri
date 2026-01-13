@@ -7,68 +7,68 @@
  * Prerequisites:
  * - Create an OAuth 2.0 connection named "fawri_oauth_connection" in Zoho Books
  * - Configure the connection with your OAuth credentials
+ *
+ * Arguments (passed from workflow):
+ * - paymentId (string): The payment ID
+ * - organizationId (string): Your Zoho Books organization ID
  */
 
-// Function to trigger FAWRI API
-void triggerFawriApi(int paymentId, string organizationId)
+// API Endpoint
+apiEndpoint = "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute";
+
+// Fetch payment details from Zoho Books
+paymentResponse = zoho.books.getRecordsByID("payments", organizationId, paymentId);
+
+if(paymentResponse.get("code") == 0)
 {
-    // API Endpoint
-    apiEndpoint = "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute";
+    payment = paymentResponse.get("payment");
 
-    // Fetch payment details from Zoho Books
-    paymentResponse = zoho.books.getRecordsByID("payments", organizationId, paymentId);
+    // Build the payload with payment basic info
+    payload = Map();
+    payload.put("payment_id", payment.get("payment_id"));
+    payload.put("amount", payment.get("amount"));
+    payload.put("currency_code", payment.get("currency_code"));
+    payload.put("date", payment.get("date"));
+    payload.put("reference_number", payment.get("reference_number"));
+    payload.put("payment_mode", payment.get("payment_mode"));
+    payload.put("description", payment.get("description"));
+    payload.put("customer_id", payment.get("customer_id"));
+    payload.put("customer_name", payment.get("customer_name"));
 
-    if(paymentResponse.get("code") == 0)
+    // Add timestamp for tracking
+    payload.put("triggered_at", zoho.currenttime.toString("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+
+    // Set headers
+    headers = Map();
+    headers.put("Content-Type", "application/json");
+    headers.put("Accept", "application/json");
+
+    // Make API call using OAuth connection
+    // The connection "fawri_oauth_connection" handles OAuth 2.0 token management automatically
+    response = invokeurl
+    [
+        url: apiEndpoint
+        type: POST
+        parameters: payload.toString()
+        headers: headers
+        connection: "fawri_oauth_connection"
+    ];
+
+    // Log the response for debugging
+    info "FAWRI API Response: " + response;
+
+    // Check response status
+    if(response.get("status") == "success" || response.get("code") == 200)
     {
-        payment = paymentResponse.get("payment");
-
-        // Build the payload with payment basic info
-        payload = Map();
-        payload.put("payment_id", payment.get("payment_id"));
-        payload.put("amount", payment.get("amount"));
-        payload.put("currency_code", payment.get("currency_code"));
-        payload.put("date", payment.get("date"));
-        payload.put("reference_number", payment.get("reference_number"));
-        payload.put("payment_mode", payment.get("payment_mode"));
-        payload.put("description", payment.get("description"));
-        payload.put("customer_id", payment.get("customer_id"));
-        payload.put("customer_name", payment.get("customer_name"));
-
-        // Add timestamp for tracking
-        payload.put("triggered_at", zoho.currenttime.toString("yyyy-MM-dd'T'HH:mm:ss'Z'"));
-
-        // Set headers
-        headers = Map();
-        headers.put("Content-Type", "application/json");
-        headers.put("Accept", "application/json");
-
-        // Make API call using OAuth connection
-        // The connection "fawri_oauth_connection" handles OAuth 2.0 token management automatically
-        response = invokeurl
-        [
-            url: apiEndpoint
-            type: POST
-            parameters: payload.toString()
-            headers: headers
-            connection: "fawri_oauth_connection"
-        ];
-
-        // Log the response for debugging
-        info "FAWRI API Response: " + response;
-
-        // Check response status
-        if(response.get("status") == "success" || response.get("code") == 200)
-        {
-            info "FAWRI API call successful for payment: " + paymentId;
-        }
-        else
-        {
-            // Log error for troubleshooting
-            info "FAWRI API call failed for payment: " + paymentId + " - Error: " + response;
-        }
+        info "FAWRI API call successful for payment: " + paymentId;
     }
     else
     {
-        info "Failed to fetch payment details for payment ID: " + paymentId;
+        // Log error for troubleshooting
+        info "FAWRI API call failed for payment: " + paymentId + " - Error: " + response;
     }
+}
+else
+{
+    info "Failed to fetch payment details for payment ID: " + paymentId;
 }
