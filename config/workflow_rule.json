@@ -1,0 +1,42 @@
+{
+  "workflow_name": "Trigger FAWRI API on Payment Creation",
+  "description": "Automatically triggers the FAWRI API when a new payment is created",
+  "module": "Payments",
+  "trigger": {
+    "type": "Record Action",
+    "event": "Created",
+    "execute_when": "A payment is created"
+  },
+  "conditions": {
+    "type": "All Payments",
+    "criteria": "Execute for all payments (no conditions)",
+    "note": "Add conditions here if you want to filter specific payments"
+  },
+  "actions": {
+    "type": "Custom Function",
+    "function_name": "triggerFawriApi",
+    "parameters": [
+      {
+        "name": "paymentId",
+        "value": "${payment.payment_id}",
+        "description": "The ID of the created payment"
+      },
+      {
+        "name": "organizationId",
+        "value": "${organization.organization_id}",
+        "description": "Your Zoho Books organization ID"
+      }
+    ]
+  },
+  "setup_instructions": [
+    "1. Go to Settings > Automation > Workflow Rules in Zoho Books",
+    "2. Click '+ New Workflow Rule'",
+    "3. Select 'Payments' as the module",
+    "4. Set trigger as 'When a payment is Created'",
+    "5. Add conditions if needed (optional)",
+    "6. In Actions, select 'Custom Function'",
+    "7. Choose the 'triggerFawriApi' function",
+    "8. Map the parameters: paymentId and organizationId",
+    "9. Save and activate the workflow rule"
+  ]
+}

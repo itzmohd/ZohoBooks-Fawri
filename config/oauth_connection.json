@@ -1,0 +1,23 @@
+{
+  "connection_name": "fawri_oauth_connection",
+  "description": "OAuth 2.0 connection for FAWRI API integration",
+  "service": "Custom Service",
+  "authentication_type": "OAuth 2.0",
+  "grant_type": "client_credentials",
+  "configuration": {
+    "token_url": "https://oic.asbblabs.com/oauth2/token",
+    "client_id": "<YOUR_CLIENT_ID>",
+    "client_secret": "<YOUR_CLIENT_SECRET>",
+    "scope": "",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  },
+  "api_endpoint": "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute",
+  "notes": [
+    "Replace <YOUR_CLIENT_ID> with your actual OAuth client ID",
+    "Replace <YOUR_CLIENT_SECRET> with your actual OAuth client secret",
+    "Update token_url if different from the placeholder",
+    "Update scope if required by the API"
+  ]
+}

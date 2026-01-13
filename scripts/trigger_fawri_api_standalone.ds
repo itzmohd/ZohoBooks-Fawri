@@ -1,0 +1,121 @@
+/**
+ * Zoho Books Custom Function: Trigger FAWRI API on Payment Creation
+ * STANDALONE VERSION - Manual OAuth token handling
+ *
+ * Use this version if you prefer to manage OAuth tokens manually
+ * instead of using Zoho's connection feature.
+ *
+ * Note: You'll need to store your credentials securely using Zoho CRM variables
+ * or another secure storage mechanism.
+ */
+
+// Function to get OAuth access token
+string getOAuthToken()
+{
+    // OAuth Configuration - UPDATE THESE VALUES
+    tokenUrl = "https://oic.asbblabs.com/oauth2/token";
+    clientId = "YOUR_CLIENT_ID";      // Replace with actual client ID
+    clientSecret = "YOUR_CLIENT_SECRET";  // Replace with actual client secret
+
+    // Build token request body
+    tokenParams = Map();
+    tokenParams.put("grant_type", "client_credentials");
+    tokenParams.put("client_id", clientId);
+    tokenParams.put("client_secret", clientSecret);
+
+    // Set headers for token request
+    tokenHeaders = Map();
+    tokenHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+
+    // Request access token
+    tokenResponse = invokeurl
+    [
+        url: tokenUrl
+        type: POST
+        parameters: tokenParams
+        headers: tokenHeaders
+    ];
+
+    info "Token Response: " + tokenResponse;
+
+    if(tokenResponse.containKey("access_token"))
+    {
+        return tokenResponse.get("access_token");
+    }
+    else
+    {
+        info "Failed to get access token: " + tokenResponse;
+        return "";
+    }
+}
+
+// Main function to trigger FAWRI API
+void triggerFawriApiStandalone(int paymentId, string organizationId)
+{
+    // API Endpoint
+    apiEndpoint = "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute";
+
+    // Get OAuth token
+    accessToken = getOAuthToken();
+
+    if(accessToken == "")
+    {
+        info "Unable to proceed without access token";
+        return;
+    }
+
+    // Fetch payment details from Zoho Books
+    paymentResponse = zoho.books.getRecordsByID("payments", organizationId, paymentId);
+
+    if(paymentResponse.get("code") == 0)
+    {
+        payment = paymentResponse.get("payment");
+
+        // Build the payload with payment basic info
+        payload = Map();
+        payload.put("payment_id", payment.get("payment_id"));
+        payload.put("amount", payment.get("amount"));
+        payload.put("currency_code", payment.get("currency_code"));
+        payload.put("date", payment.get("date"));
+        payload.put("reference_number", payment.get("reference_number"));
+        payload.put("payment_mode", payment.get("payment_mode"));
+        payload.put("description", payment.get("description"));
+        payload.put("customer_id", payment.get("customer_id"));
+        payload.put("customer_name", payment.get("customer_name"));
+
+        // Add timestamp for tracking
+        payload.put("triggered_at", zoho.currenttime.toString("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+
+        // Set headers with Bearer token
+        headers = Map();
+        headers.put("Content-Type", "application/json");
+        headers.put("Accept", "application/json");
+        headers.put("Authorization", "Bearer " + accessToken);
+
+        // Make API call
+        response = invokeurl
+        [
+            url: apiEndpoint
+            type: POST
+            parameters: payload.toString()
+            headers: headers
+        ];
+
+        // Log the response for debugging
+        info "FAWRI API Response: " + response;
+
+        // Check response status
+        if(response.get("status") == "success" || response.get("code") == 200)
+        {
+            info "FAWRI API call successful for payment: " + paymentId;
+        }
+        else
+        {
+            info "FAWRI API call failed for payment: " + paymentId + " - Error: " + response;
+        }
+    }
+    else
+    {
+        info "Failed to fetch payment details for payment ID: " + paymentId;
+    }
+}
