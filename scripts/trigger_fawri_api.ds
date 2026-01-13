@@ -7,17 +7,27 @@
  * Prerequisites:
  * - Create an OAuth 2.0 connection named "fawri_oauth_connection" in Zoho Books
  * - Configure the connection with your OAuth credentials
+ * - Update the ORGANIZATION_ID below with your Zoho Books Organization ID
  *
  * Arguments (passed from workflow):
- * - paymentId (string): The payment ID
- * - organizationId (string): Your Zoho Books organization ID
+ * - paymentId (string): The Payment ID
  */
+
+// ============================================================
+// CONFIGURATION - UPDATE THIS VALUE
+// ============================================================
+// To find your Organization ID:
+// 1. Go to Settings (gear icon) > Organization Profile
+// 2. Copy the Organization ID shown on that page
+// ============================================================
+ORGANIZATION_ID = "YOUR_ORGANIZATION_ID";
+// ============================================================
 
 // API Endpoint
 apiEndpoint = "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute";
 
 // Fetch payment details from Zoho Books
-paymentResponse = zoho.books.getRecordsByID("payments", organizationId, paymentId);
+paymentResponse = zoho.books.getRecordsByID("payments", ORGANIZATION_ID, paymentId);
 
 if(paymentResponse.get("code") == 0)
 {
@@ -70,5 +80,5 @@ if(paymentResponse.get("code") == 0)
 }
 else
 {
-    info "Failed to fetch payment details for payment ID: " + paymentId;
+    info "Failed to fetch payment details for payment ID: " + paymentId + " - Response: " + paymentResponse;
 }

@@ -1,42 +1,50 @@
 {
   "workflow_name": "Trigger FAWRI API on Payment Creation",
   "description": "Automatically triggers the FAWRI API when a new payment is created",
-  "module": "Payments",
+  "module": "Payments Received",
   "trigger": {
-    "type": "Record Action",
+    "workflow_type": "Event Based",
     "event": "Created",
-    "execute_when": "A payment is created"
+    "execute_when": "When a Payment Received is Created"
   },
   "conditions": {
-    "type": "All Payments",
+    "type": "All Payments Received",
     "criteria": "Execute for all payments (no conditions)",
-    "note": "Add conditions here if you want to filter specific payments"
+    "note": "Add conditions here if you want to filter specific payments. You can use field comparison (2025 feature) for advanced filtering."
   },
   "actions": {
-    "type": "Custom Function",
+    "type": "Immediate Actions",
+    "action": "Custom Functions",
     "function_name": "triggerFawriApi",
     "parameters": [
       {
         "name": "paymentId",
-        "value": "${payment.payment_id}",
+        "value": "Payment ID (from field picker)",
+        "type": "String",
         "description": "The ID of the created payment"
-      },
-      {
-        "name": "organizationId",
-        "value": "${organization.organization_id}",
-        "description": "Your Zoho Books organization ID"
       }
-    ]
+    ],
+    "note": "Organization ID must be configured in the script (line 23). Go to Settings > Organization Profile to find your Organization ID."
   },
   "setup_instructions": [
-    "1. Go to Settings > Automation > Workflow Rules in Zoho Books",
-    "2. Click '+ New Workflow Rule'",
-    "3. Select 'Payments' as the module",
-    "4. Set trigger as 'When a payment is Created'",
-    "5. Add conditions if needed (optional)",
-    "6. In Actions, select 'Custom Function'",
-    "7. Choose the 'triggerFawriApi' function",
-    "8. Map the parameters: paymentId and organizationId",
-    "9. Save and activate the workflow rule"
-  ]
+    "1. Click the Settings gear icon (top-right corner)",
+    "2. Select Automation from the left sidebar",
+    "3. Click Workflow Rules",
+    "4. Click + New Workflow Rule (top-right corner)",
+    "5. Set Workflow Rule Name: 'Trigger FAWRI API on Payment Creation'",
+    "6. Select Module: 'Payments Received'",
+    "7. Under Workflow Rule Execution Condition:",
+    "   - Workflow Type: Event Based",
+    "   - When a Payment Received is: Created",
+    "8. Under Conditions: Select 'All Payments Received' or add specific criteria",
+    "9. Under Actions:",
+    "   - Click + Add New Action",
+    "   - Select Immediate Actions",
+    "   - Choose Custom Functions from dropdown",
+    "   - Select 'triggerFawriApi'",
+    "   - Map paymentId to Payment ID field",
+    "10. Click Save",
+    "11. Ensure the workflow rule is Active (green toggle switch)"
+  ],
+  "navigation_path": "Settings (gear icon) > Automation > Workflow Rules > + New Workflow Rule"
 }

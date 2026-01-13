@@ -6,14 +6,20 @@
  * instead of using Zoho's connection feature.
  *
  * Arguments (passed from workflow):
- * - paymentId (string): The payment ID
- * - organizationId (string): Your Zoho Books organization ID
+ * - paymentId (string): The Payment ID
  */
 
-// OAuth Configuration - UPDATE THESE VALUES
+// ============================================================
+// CONFIGURATION - UPDATE THESE VALUES
+// ============================================================
+// Organization ID: Go to Settings > Organization Profile to find it
+ORGANIZATION_ID = "YOUR_ORGANIZATION_ID";
+
+// OAuth Configuration
 tokenUrl = "https://oic.asbblabs.com/oauth2/token";
 clientId = "YOUR_CLIENT_ID";
 clientSecret = "YOUR_CLIENT_SECRET";
+// ============================================================
 
 // API Endpoint
 apiEndpoint = "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute";
@@ -51,7 +57,7 @@ else
 }
 
 // Fetch payment details from Zoho Books
-paymentResponse = zoho.books.getRecordsByID("payments", organizationId, paymentId);
+paymentResponse = zoho.books.getRecordsByID("payments", ORGANIZATION_ID, paymentId);
 
 if(paymentResponse.get("code") == 0)
 {
@@ -102,5 +108,5 @@ if(paymentResponse.get("code") == 0)
 }
 else
 {
-    info "Failed to fetch payment details for payment ID: " + paymentId;
+    info "Failed to fetch payment details for payment ID: " + paymentId + " - Response: " + paymentResponse;
 }

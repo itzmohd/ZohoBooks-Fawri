@@ -1,23 +1,55 @@
 {
   "connection_name": "fawri_oauth_connection",
   "description": "OAuth 2.0 connection for FAWRI API integration",
-  "service": "Custom Service",
+  "service_name": "FAWRI API",
   "authentication_type": "OAuth 2.0",
   "grant_type": "client_credentials",
+  "step1_register_oauth_client": {
+    "url": "https://accounts.zoho.com/developerconsole",
+    "instructions": [
+      "1. Go to Zoho Developer Console",
+      "2. Click 'Add Client ID'",
+      "3. Enter Client Name: 'FAWRI Integration'",
+      "4. Enter Client Domain: Your domain",
+      "5. Set Redirect URI: 'https://deluge.zoho.com/delugeauth/callback'",
+      "6. Select Client Type: 'Web based'",
+      "7. Click 'Create'",
+      "8. Copy and save the Client ID and Client Secret"
+    ],
+    "redirect_uri": "https://deluge.zoho.com/delugeauth/callback"
+  },
+  "step2_create_connection": {
+    "navigation_path": "Settings (gear icon) > Developer Space > Connections > + New Connection",
+    "instructions": [
+      "1. Click the Settings gear icon (top-right corner)",
+      "2. Scroll down to Developer Space section",
+      "3. Click Connections",
+      "4. Click + New Connection (top-right corner)",
+      "5. Go to Custom Services tab",
+      "6. Click + Create New Service",
+      "7. Fill in the service configuration (see below)",
+      "8. Click Create",
+      "9. Create the connection with name 'fawri_oauth_connection'",
+      "10. Click Create and Connect",
+      "11. Authorize when prompted"
+    ]
+  },
   "configuration": {
-    "token_url": "https://oic.asbblabs.com/oauth2/token",
+    "service_name": "FAWRI API",
+    "authentication_type": "OAuth 2.0",
     "client_id": "<YOUR_CLIENT_ID>",
     "client_secret": "<YOUR_CLIENT_SECRET>",
-    "scope": "",
-    "headers": {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
+    "authorize_url": "https://oic.asbblabs.com/oauth2/authorize",
+    "access_token_url": "https://oic.asbblabs.com/oauth2/token",
+    "refresh_token_url": "https://oic.asbblabs.com/oauth2/token",
+    "scope": ""
   },
   "api_endpoint": "https://oic.asbblabs.com/ic/api/integration/v1/flows/rest/CHANNELS_FAWRI_FT/1.0/fawri_execute",
   "notes": [
-    "Replace <YOUR_CLIENT_ID> with your actual OAuth client ID",
-    "Replace <YOUR_CLIENT_SECRET> with your actual OAuth client secret",
-    "Update token_url if different from the placeholder",
-    "Update scope if required by the API"
+    "Replace <YOUR_CLIENT_ID> with your actual OAuth client ID from Step 1",
+    "Replace <YOUR_CLIENT_SECRET> with your actual OAuth client secret from Step 1",
+    "Update authorize_url, access_token_url, and refresh_token_url with actual URLs from your API provider",
+    "Update scope if required by the API (comma-separated list)",
+    "The connection name 'fawri_oauth_connection' must match the name used in the Deluge script"
   ]
 }
