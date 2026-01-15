@@ -1,50 +1,29 @@
 {
-  "workflow_name": "Trigger FAWRI API on Payment Creation",
-  "description": "Automatically triggers the FAWRI API when a new payment is created",
-  "module": "Payments Received",
+  "workflow_name": "Trigger FAWRI API on Bill Payment",
+  "description": "Triggers the FAWRI API when you record a payment to a vendor (bill is paid)",
+  "module": "Bills",
   "trigger": {
     "workflow_type": "Event Based",
-    "event": "Created",
-    "execute_when": "When a Payment Received is Created"
+    "event": "Edited",
+    "execute_when": "When a Bill is Edited (catches payment status changes)"
   },
   "conditions": {
-    "type": "All Payments Received",
-    "criteria": "Execute for all payments (no conditions)",
-    "note": "Add conditions here if you want to filter specific payments. You can use field comparison (2025 feature) for advanced filtering."
+    "field": "Payment Status",
+    "operator": "is",
+    "value": "Paid"
   },
   "actions": {
     "type": "Immediate Actions",
     "action": "Custom Functions",
-    "function_name": "triggerFawriApi",
-    "parameters": [
-      {
-        "name": "paymentId",
-        "value": "Payment ID (from field picker)",
-        "type": "String",
-        "description": "The ID of the created payment"
-      }
-    ],
-    "note": "Organization ID must be configured in the script (line 23). Go to Settings > Organization Profile to find your Organization ID."
+    "function_name": "triggerFawriApi"
   },
   "setup_instructions": [
-    "1. Click the Settings gear icon (top-right corner)",
-    "2. Select Automation from the left sidebar",
-    "3. Click Workflow Rules",
-    "4. Click + New Workflow Rule (top-right corner)",
-    "5. Set Workflow Rule Name: 'Trigger FAWRI API on Payment Creation'",
-    "6. Select Module: 'Payments Received'",
-    "7. Under Workflow Rule Execution Condition:",
-    "   - Workflow Type: Event Based",
-    "   - When a Payment Received is: Created",
-    "8. Under Conditions: Select 'All Payments Received' or add specific criteria",
-    "9. Under Actions:",
-    "   - Click + Add New Action",
-    "   - Select Immediate Actions",
-    "   - Choose Custom Functions from dropdown",
-    "   - Select 'triggerFawriApi'",
-    "   - Map paymentId to Payment ID field",
-    "10. Click Save",
-    "11. Ensure the workflow rule is Active (green toggle switch)"
-  ],
-  "navigation_path": "Settings (gear icon) > Automation > Workflow Rules > + New Workflow Rule"
+    "1. Settings > Automation > Workflow Rules",
+    "2. + New Workflow Rule",
+    "3. Module: Bills",
+    "4. When a Bill is: Edited",
+    "5. Condition: Payment Status is Paid",
+    "6. Action: Custom Functions > triggerFawriApi",
+    "7. Save and Activate"
+  ]
 }

@@ -1,18 +1,18 @@
 /**
- * Zoho Books Custom Function: Trigger FAWRI API on Payment Creation
+ * Zoho Books Custom Function: Trigger FAWRI API on Bill Payment
  * STANDALONE VERSION - Manual OAuth token handling
  *
- * Use this version if you prefer to manage OAuth tokens manually
- * instead of using Zoho's connection feature.
+ * This function is triggered when a bill is marked as Paid in Zoho Books.
+ * (When you record a payment to a vendor/supplier)
  *
- * Arguments (passed from workflow):
- * - paymentId (string): The Payment ID
+ * How to use:
+ * - When creating this function, select Module: "Bills"
+ * - The 'bill' map is automatically available from the workflow trigger
  */
 
 // ============================================================
 // CONFIGURATION - UPDATE THESE VALUES
 // ============================================================
-// Organization ID: Go to Settings > Organization Profile to find it
 ORGANIZATION_ID = "YOUR_ORGANIZATION_ID";
 
 // OAuth Configuration
@@ -56,57 +56,69 @@ else
     return;
 }
 
-// Fetch payment details from Zoho Books
-paymentResponse = zoho.books.getRecordsByID("payments", ORGANIZATION_ID, paymentId);
+// Debug: Log the bill map to see available fields
+info "Bill map from trigger: " + bill;
 
-if(paymentResponse.get("code") == 0)
+// Get bill details directly from the trigger map (no API call needed)
+billId = ifnull(bill.get("bill_id"), "");
+billNumber = ifnull(bill.get("bill_number"), "");
+total = ifnull(bill.get("total"), 0);
+paymentMade = ifnull(bill.get("payment_made"), 0);
+balance = ifnull(bill.get("balance"), 0);
+currencyCode = ifnull(bill.get("currency_code"), "");
+billDate = ifnull(bill.get("date"), "");
+dueDate = ifnull(bill.get("due_date"), "");
+referenceNumber = ifnull(bill.get("reference_number"), "");
+status = ifnull(bill.get("status"), "");
+vendorId = ifnull(bill.get("vendor_id"), "");
+vendorName = ifnull(bill.get("vendor_name"), "");
+
+// Build the payload with bill/payment info
+payload = Map();
+payload.put("bill_id", billId);
+payload.put("bill_number", billNumber);
+payload.put("amount", total);
+payload.put("amount_paid", paymentMade);
+payload.put("balance", balance);
+payload.put("currency_code", currencyCode);
+payload.put("date", billDate);
+payload.put("due_date", dueDate);
+payload.put("reference_number", referenceNumber);
+payload.put("status", status);
+payload.put("vendor_id", vendorId);
+payload.put("vendor_name", vendorName);
+payload.put("organization_id", ORGANIZATION_ID);
+
+// Add timestamp for tracking
+payload.put("triggered_at", zoho.currenttime.toString("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+
+// Debug: Log the payload
+info "Payload to send: " + payload;
+
+// Set headers with Bearer token
+headers = Map();
+headers.put("Content-Type", "application/json");
+headers.put("Accept", "application/json");
+headers.put("Authorization", "Bearer " + accessToken);
+
+// Make API call
+response = invokeurl
+[
+    url: apiEndpoint
+    type: POST
+    parameters: payload.toString()
+    headers: headers
+];
+
+// Log the response for debugging
+info "FAWRI API Response: " + response;
+
+// Check response status
+if(response.get("status") == "success" || response.get("code") == 200)
 {
-    payment = paymentResponse.get("payment");
-
-    // Build the payload with payment basic info
-    payload = Map();
-    payload.put("payment_id", payment.get("payment_id"));
-    payload.put("amount", payment.get("amount"));
-    payload.put("currency_code", payment.get("currency_code"));
-    payload.put("date", payment.get("date"));
-    payload.put("reference_number", payment.get("reference_number"));
-    payload.put("payment_mode", payment.get("payment_mode"));
-    payload.put("description", payment.get("description"));
-    payload.put("customer_id", payment.get("customer_id"));
-    payload.put("customer_name", payment.get("customer_name"));
-
-    // Add timestamp for tracking
-    payload.put("triggered_at", zoho.currenttime.toString("yyyy-MM-dd'T'HH:mm:ss'Z'"));
-
-    // Set headers with Bearer token
-    headers = Map();
-    headers.put("Content-Type", "application/json");
-    headers.put("Accept", "application/json");
-    headers.put("Authorization", "Bearer " + accessToken);
-
-    // Make API call
-    response = invokeurl
-    [
-        url: apiEndpoint
-        type: POST
-        parameters: payload.toString()
-        headers: headers
-    ];
-
-    // Log the response for debugging
-    info "FAWRI API Response: " + response;
-
-    // Check response status
-    if(response.get("status") == "success" || response.get("code") == 200)
-    {
-        info "FAWRI API call successful for payment: " + paymentId;
-    }
-    else
-    {
-        info "FAWRI API call failed for payment: " + paymentId + " - Error: " + response;
-    }
+    info "FAWRI API call successful for bill: " + billId;
 }
 else
 {
-    info "Failed to fetch payment details for payment ID: " + paymentId + " - Response: " + paymentResponse;
+    info "FAWRI API call failed for bill: " + billId + " - Error: " + response;
 }
